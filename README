@@ -1,25 +1,73 @@
-PHP::Serialization version 0.27
-===================================
+NAME
+    PHP::Serialization - simple flexible means of converting the output of
+    PHP's serialize() into the equivalent Perl memory structure, and vice
+    versa.
 
-This module provides a quick, clean, and simple means of decoding/encoding PHP serialized memory structures/objects into compatible Perl memory structures. It provides both a Object oriented methodology, as well as function based wrappers using the same calling interface as PHP's serialize()/unserialize() functions.
+SYNOPSIS
+            use PHP::Serialization qw(serialize unserialize);
+            my $encoded = serialize({ a => 1, b => 2});
+            my $hashref = unserialize($encoded);
 
-INSTALLATION
+DESCRIPTION
+    Provides a simple, quick means of serializing perl memory structures
+    (including object data!) into a format that PHP can deserialize() and
+    access, and vice versa.
 
-To install this module type the following:
+    NOTE: Converts PHP arrays into Perl Arrays when the PHP array used
+    exclusively numeric indexes, and into Perl Hashes then the PHP array did
+    not.
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+FUNCTIONS
+    Exportable functions..
 
-DEPENDENCIES
+  serialize($var)
+    Serializes the memory structure pointed to by $var, and returns a scalar
+    value of encoded data.
 
-No dependencies :)
+    NOTE: Will recursively encode objects, hashes, arrays, etc.
 
-COPYRIGHT AND LICENCE
+    SEE ALSO: ->encode()
 
-Copyright (C) 2003 Jesse Brown <jbrown@cpan.org>
+  unserialize($encoded,[optional CLASS])
+    Deserializes the encoded data in $encoded, and returns a value (be it a
+    hashref, arrayref, scalar, etc) representing the data structure
+    serialized in $encoded_string.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+    If the optional CLASS is specified, any objects are blessed into
+    CLASS::$serialized_class. Otherwise, O bjects are blessed into
+    PHP::Serialization::Object::$serialized_class. (which has no methods)
+
+    SEE ALSO: ->decode()
+
+METHODS
+    Functionality available if using the object interface..
+
+  decode($encoded_string,[optional CLASS])
+    Deserializes the encoded data in $encoded, and returns a value (be it a
+    hashref, arrayref, scalar, etc) representing the data structure
+    serialized in $encoded_string.
+
+    If the optional CLASS is specified, any objects are blessed into
+    CLASS::$serialized_class. Otherwise, Objects are blessed into
+    PHP::Serialization::Object::$serialized_class. (which has no methods)
+
+    SEE ALSO: unserialize()
+
+  encode($reference)
+    Serializes the memory structure pointed to by $var, and returns a scalar
+    value of encoded data.
+
+    NOTE: Will recursively encode objects, hashes, arrays, etc.
+
+    SEE ALSO: serialize()
+
+TODO
+    Make faster! (and more efficent?)
+
+AUTHOR INFORMATION
+    Copyright (c) 2003 Jesse Brown <jbrown@cpan.org>. All rights reserved.
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+    Currently maintained by Tomas Doran <bobtfish@bobtfish.net>.
 
