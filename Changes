@@ -1,15 +1,24 @@
 Revision history for Perl extension PHP::Serialization
 
+0.29
+ - Fix bug with negative numbers, RT#6402, patch from
+   <tom [...] eborcom.com>
+ - Add TODO test for RT21218
+ - Add TODO test for RT24441
+
 0.28
- - Fix RT#6112 - serializing long integers comes out as -1 on the PHP end
-   patch from <kcivey@cpcug.org>.
- - Add test for the issue above.
- - Fix POD as noted in RT#6113.
- - Only require perl 5.6 in Makefile.PL (RT#17034)
+ - Serializing long integers comes out  as -1 on the PHP end 
+   as noted in RT#6112 patch from <kcivey [...] cpcug.org>.
+ - Add test for the issue above (t0m).
+ - Fix POD as noted in RT#6113 by MCMAHON.
+ - Only require perl 5.6 in Makefile.PL as noted in RT#17034
+   by <kcivey [...] cpcug.org>
 
 0.27
- - Fixed versioning (internal lib version was .26, was reporting as .25 in previous version)
- - Fixed array serialization/unserialization issues due to incorrect element counts
+ - Fixed versioning (internal lib version was .26, was reporting 
+   as .25 in previous version)
+ - Fixed array serialization/unserialization issues due to 
+   incorrect element counts
  - Fixed overly restrictive perl version requirement
  - Fixed formatting issues in the documentation
 
