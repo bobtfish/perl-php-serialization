@@ -7,7 +7,7 @@ BEGIN {
 	our ($VERSION,@EXPORT_OK,@ISA);
 
 	# Revision.
-	$VERSION = 0.26;
+	$VERSION = 0.27;
 	
 	# Our inheritence
 	@ISA = qw(Exporter);
@@ -85,7 +85,7 @@ Functionality available if using the object interface..
 
 =cut
 
-=item * decode($encoded_string,[optional CLASS])
+=head2 decode($encoded_string,[optional CLASS])
 
   Deserializes the encoded data in $encoded, and returns a value (be it a hashref, arrayref, scalar, etc) representing the data structure serialized in $encoded_string.
 
@@ -340,7 +340,7 @@ sub _encode {
 		$buffer .= sprintf('s:%d:"%s";',length($val),$val);
 	} elsif ( $type eq 'array' ) {
 		if ( ref($val) eq 'ARRAY' ) {
-			$buffer .= sprintf('a:%d:',(($#{$val}+1)*2)) . '{';
+			$buffer .= sprintf('a:%d:',($#{$val}+1)) . '{';
 			map { $buffer .= $self->encode($_); $buffer .= $self->encode($$val[$_]); } 0..$#{$val};
 			$buffer .= '}';
 		} else {
