@@ -1,4 +1,4 @@
-PHP::Serialization version 0.25
+PHP::Serialization version 0.27
 ===================================
 
 This module provides a quick, clean, and simple means of decoding/encoding PHP serialized memory structures/objects into compatible Perl memory structures. It provides both a Object oriented methodology, as well as function based wrappers using the same calling interface as PHP's serialize()/unserialize() functions.
