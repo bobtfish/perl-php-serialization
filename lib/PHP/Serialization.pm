@@ -1,21 +1,14 @@
 package PHP::Serialization;
 use strict;
 use warnings;
+use Exporter ();
 
-BEGIN {
-	use Exporter ();
-	our ($VERSION,@EXPORT_OK,@ISA);
+use vars qw/$VERSION @ISA @EXPORT_OK/;
 
-	# Revision.
-	$VERSION = 0.28;
+$VERSION = '0.28';
 	
-	# Our inheritence
-	@ISA = qw(Exporter);
-
-	# Stuff they can request.
-	@EXPORT_OK = qw(unserialize serialize);
-}
-our (@EXPORT_OK);
+@ISA = qw(Exporter);	
+@EXPORT_OK = qw(unserialize serialize);
 
 =head1 NAME
 
