@@ -6,3 +6,4 @@ lib/PHP/Serialization.pm
 t/01use.t
 t/02basic.t
 t/03largeints.t
+t/04arraysRT21218.t
