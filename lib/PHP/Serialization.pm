@@ -7,7 +7,7 @@ BEGIN {
 	our ($VERSION,@EXPORT_OK,@ISA);
 
 	# Revision.
-	$VERSION = 0.27;
+	$VERSION = 0.28;
 	
 	# Our inheritence
 	@ISA = qw(Exporter);
@@ -32,9 +32,9 @@ PHP::Serialization - simple flexible means of converting the output of PHP's ser
 
 =head1 DESCRIPTION
 
-	Provides a simple, quick means of serializing perl memory structures (including object data!) into a format that PHP can deserialize() and access, and vice versa. 
+Provides a simple, quick means of serializing perl memory structures (including object data!) into a format that PHP can deserialize() and access, and vice versa. 
 
-	NOTE: Converts PHP arrays into Perl Arrays when the PHP array used exclusively numeric indexes, and into Perl Hashes then the PHP array did not.
+NOTE: Converts PHP arrays into Perl Arrays when the PHP array used exclusively numeric indexes, and into Perl Hashes then the PHP array did not.
 
 =cut
 
@@ -51,11 +51,11 @@ Exportable functions..
 
 =head2 serialize($var)
 
-	Serializes the memory structure pointed to by $var, and returns a scalar value of encoded data. 
+Serializes the memory structure pointed to by $var, and returns a scalar value of encoded data. 
 
-	NOTE: Will recursively encode objects, hashes, arrays, etc. 
+NOTE: Will recursively encode objects, hashes, arrays, etc. 
 
-	SEE ALSO: ->encode()
+SEE ALSO: ->encode()
 
 =cut
 
@@ -66,11 +66,13 @@ sub serialize {
 
 =head2 unserialize($encoded,[optional CLASS])
 
-  Deserializes the encoded data in $encoded, and returns a value (be it a hashref, arrayref, scalar, etc) representing the data structure serialized in $encoded_string.
+Deserializes the encoded data in $encoded, and returns a value (be it a hashref, arrayref, scalar, etc) 
+representing the data structure serialized in $encoded_string.
 
-  If the optional CLASS is specified, any objects are blessed into CLASS::$serialized_class. Otherwise, Objects are blessed into PHP::Serialization::Object::$serialized_class. (which has no methods)
+If the optional CLASS is specified, any objects are blessed into CLASS::$serialized_class. Otherwise, O
+bjects are blessed into PHP::Serialization::Object::$serialized_class. (which has no methods)
 
-	SEE ALSO: ->decode()
+SEE ALSO: ->decode()
 
 =cut
 
@@ -87,11 +89,13 @@ Functionality available if using the object interface..
 
 =head2 decode($encoded_string,[optional CLASS])
 
-  Deserializes the encoded data in $encoded, and returns a value (be it a hashref, arrayref, scalar, etc) representing the data structure serialized in $encoded_string.
+Deserializes the encoded data in $encoded, and returns a value (be it a hashref, arrayref, scalar, etc) 
+representing the data structure serialized in $encoded_string.
 
-  If the optional CLASS is specified, any objects are blessed into CLASS::$serialized_class. Otherwise, Objects are blessed into PHP::Serialization::Object::$serialized_class. (which has no methods)
+If the optional CLASS is specified, any objects are blessed into CLASS::$serialized_class. Otherwise, 
+Objects are blessed into PHP::Serialization::Object::$serialized_class. (which has no methods)
 
-	SEE ALSO: unserialize()
+SEE ALSO: unserialize()
 
 =cut
 
@@ -288,11 +292,11 @@ sub _skipchar {
 
 =head2 encode($reference)
 
-	Serializes the memory structure pointed to by $var, and returns a scalar value of encoded data. 
+Serializes the memory structure pointed to by $var, and returns a scalar value of encoded data. 
 
-	NOTE: Will recursively encode objects, hashes, arrays, etc. 
+NOTE: Will recursively encode objects, hashes, arrays, etc. 
 
-	SEE ALSO: serialize()
+SEE ALSO: serialize()
 
 =cut
 
@@ -304,9 +308,9 @@ sub encode {
 	if ( ! defined $val ) {
 		return $self->_encode('null',$val);
 	} elsif ( ! ref($val) ) {
-		if ( $val =~ /^-?\d+$/ ) {
+		if ( $val =~ /^-?\d{1,10}$/ && abs($val) < 2**31 ) {
 			return $self->_encode('int',$val);
-		} elsif ( $val =~ /^-?\d+(\.\d+)?$/ ) {
+		} elsif ( $val =~ /^-?\d+\.\d*$/ ) {
 			return $self->_encode('float',$val);
 		} else {
 			return $self->_encode('string',$val);
@@ -363,21 +367,16 @@ sub _encode {
 
 } # End of _encode sub.
 
-=head1 BUGS
-
-	None known yet, feel free to report some!
-
-=cut
-
 =head1 TODO
 
-	Make faster! (and more efficent?)
-
-=cut
+Make faster! (and more efficent?)
 
 =head1 AUTHOR INFORMATION
 
- Copyright (c) 2003 Jesse Brown <jbrown@cpan.org>. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+Copyright (c) 2003 Jesse Brown <jbrown@cpan.org>. All rights reserved. This program is free software; 
+you can redistribute it and/or modify it under the same terms as Perl itself.
+
+Currently maintained by Tomas Doran <bobtfish@bobtfish.net>.
 
 =cut
 

@@ -1,5 +1,12 @@
 Revision history for Perl extension PHP::Serialization
 
+0.28
+ - Fix RT#6112 - serializing long integers comes out as -1 on the PHP end
+   patch from <kcivey@cpcug.org>.
+ - Add test for the issue above.
+ - Fix POD as noted in RT#6113.
+ - Only require perl 5.6 in Makefile.PL (RT#17034)
+
 0.27
  - Fixed versioning (internal lib version was .26, was reporting as .25 in previous version)
  - Fixed array serialization/unserialization issues due to incorrect element counts
