@@ -8,4 +8,4 @@ my $data = {
 	second_test => [1,2,3]
 };
 my $encoded = serialize($data);
-is_deeply($data,&unserialize($encoded));
+is_deeply($data, unserialize($encoded));
