@@ -1,0 +1,25 @@
+PHP::Serialization version 0.25
+===================================
+
+This module provides a quick, clean, and simple means of decoding/encoding PHP serialized memory structures/objects into compatible Perl memory structures. It provides both a Object oriented methodology, as well as function based wrappers using the same calling interface as PHP's serialize()/unserialize() functions.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+No dependencies :)
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2003 Jesse Brown <jbrown@cpan.org>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
+

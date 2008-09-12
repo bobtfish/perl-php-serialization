@@ -1,0 +1,7 @@
+Revision history for Perl extension PHP::Serialization
+
+0.25  Tue Dec 16 05:44:04 2003
+  - Original public version
+  - Change text formatted to zap tabs in docs.
+
+
