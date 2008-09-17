@@ -1,6 +1,6 @@
 Revision history for Perl extension PHP::Serialization
 
-0.29
+0.29  2008-09-17
  - Fix bug with negative numbers, RT#6402, patch from
    <tom [...] eborcom.com>
  - Add TODO test for RT21218

@@ -5,7 +5,7 @@ use Exporter ();
 
 use vars qw/$VERSION @ISA @EXPORT_OK/;
 
-$VERSION = '0.28';
+$VERSION = '0.29';
 	
 @ISA = qw(Exporter);	
 @EXPORT_OK = qw(unserialize serialize);
