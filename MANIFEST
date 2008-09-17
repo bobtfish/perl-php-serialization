@@ -7,3 +7,4 @@ t/01use.t
 t/02basic.t
 t/03largeints.t
 t/04arraysRT21218.t
+t/05RT24441.t
