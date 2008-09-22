@@ -2,6 +2,8 @@ package PHP::Serialization;
 use strict;
 use warnings;
 use Exporter ();
+use Scalar::Util qw/blessed/;
+use Carp qw(croak confess);
 
 use vars qw/$VERSION @ISA @EXPORT_OK/;
 
@@ -32,7 +34,8 @@ NOTE: Converts PHP arrays into Perl Arrays when the PHP array used exclusively n
 =cut
 
 sub new {
-	my $self = bless({},shift);
+    my ($class) = shift;
+	my $self = bless {}, blessed($class) ? blessed($class) : $class;
 	return $self;
 }
 
@@ -53,8 +56,7 @@ SEE ALSO: ->encode()
 =cut
 
 sub serialize {
-	my $obj = PHP::Serialization->new();
-	return $obj->encode(@_);
+	return __PACKAGE__->new->encode(@_);
 }
 
 =head2 unserialize($encoded,[optional CLASS])
@@ -70,9 +72,8 @@ SEE ALSO: ->decode()
 =cut
 
 sub unserialize {
-	my $obj = PHP::Serialization->new();
-	return $obj->decode(@_);
-} # End of sub.
+	return __PACKAGE__->new->decode(@_);
+}
 
 =head1 METHODS
 
@@ -93,20 +94,18 @@ SEE ALSO: unserialize()
 =cut
 
 sub decode {
-	my $self = shift;
-	my $string = shift;
-	my $class = shift;
+	my ($self, $string, $class) = @_;
 
-	use Carp qw(croak confess);
 	my $cursor = 0;
-	$$self{'string'} = \$string;
-	$$self{'cursor'} = \$cursor;
-	$$self{'strlen'} = length($string);
+	$self->{string} = \$string;
+	$self->{cursor} = \$cursor;
+	$self->{strlen} = length($string);
 
 	if ( defined $class ) {
-		$$self{'class'} = $class;
-	} else {
-		$$self{'class'} = 'PHP::Serialization::Object';
+		$self->{class} = $class;
+	} 
+	else {
+		$self->{class} = 'PHP::Serialization::Object';
 	}	
 
 	# Ok, start parsing...
@@ -116,10 +115,12 @@ sub decode {
 	if ( $#values == -1 ) {
 		# Oops, none...
 		return;
-	} elsif ( $#values == 0 ) {
+	} 
+	elsif ( $#values == 0 ) {
 		# Ok, return our one value..
 		return $values[0];
-	} else {
+	} 
+	else {
 		# Ok, return a reference to the list.
 		return \@values;
 	}
@@ -127,63 +128,61 @@ sub decode {
 } # End of decode sub.
 
 my %type_table = (
-	'O' => 'object',
-	's' => 'scalar',
-	'a' => 'array',
-	'i' => 'integer',
-	'd'	=> 'float',
-	'b' => 'boolean',
-	'N' => 'undef',
+	O => 'object',
+	s => 'scalar',
+	a => 'array',
+	i => 'integer',
+	d => 'float',
+	b => 'boolean',
+	N => 'undef',
 );
 
 
 sub _parse {
-	my $self = shift;
-	my $cursor = $$self{'cursor'};
-	my $string = $$self{'string'};
-	my $strlen = $$self{'strlen'};
-	
-	use Carp qw(croak confess);
-
+	my ($self) = @_;
+	my $cursor = $self->{cursor};
+	my $string = $self->{string};
+	my $strlen = $self->{strlen};
+	confess("No cursor") unless $cursor;
+	confess("No string") unless $string;
+	confess("No strlen") unless $strlen;
 	my @elems;	
 	while ( $$cursor < $strlen ) {
 		# Ok, decode the type...
 		my $type = $self->_readchar();
 		# Ok, see if 'type' is a start/end brace...
-		if ( $type eq '{' ) { next; };
-		if ( $type eq '}' ) { 
-			last; 
-		};
+		next if ( $type eq '{' );
+		last if ( $type eq '}' );
 
 		if ( ! exists $type_table{$type} ) {
 			confess "Unknown type '$type'! at $$cursor";
 		}
-		$self->_skipchar(); # Toss the seperator
+		$self->_skipchar; # Toss the seperator
 		$type = $type_table{$type};
 	
 		# Ok, do per type processing..
 		if ( $type eq 'object' ) {
 			# Ok, get our name count...
 			my $namelen = $self->_readnum();
-			$self->_skipchar(); # Toss the seperator
+			$self->_skipchar;
 
 			# Ok, get our object name...
-			$self->_skipchar(); # Toss the seperator
+			$self->_skipchar;
 			my $name = $self->_readstr($namelen);
-			$self->_skipchar(); # Toss the seperator
+			$self->_skipchar;
 
 			# Ok, our sub elements...
-			$self->_skipchar(); # Toss the seperator
+			$self->_skipchar;
 			my $elemcount = $self->_readnum();
-			$self->_skipchar(); # Toss the seperator
+			$self->_skipchar;
 
 			my %value = $self->_parse();
-			push(@elems,bless(\%value,$$self{'class'} . '::' . $name));
+			push(@elems, bless(\%value, $self->{class} . '::' . $name));
 		} elsif ( $type eq 'array' ) {
 			# Ok, our sub elements...
-			$self->_skipchar(); # Toss the seperator
+			$self->_skipchar;
 			my $elemcount = $self->_readnum();
-			$self->_skipchar(); # Toss the seperator
+			$self->_skipchar;
 
 			my @values = $self->_parse();
 			# If every other key is not numeric, map to a hash..
@@ -191,7 +190,7 @@ sub _parse {
 			my @newlist;
 			foreach ( 0..$#values ) {
 				if ( ($_ % 2) ) { 
-					push(@newlist,$values[$_]);
+					push(@newlist, $values[$_]);
 					next; 
 				}
 				if ( $values[$_] !~ /^\d+$/ ) {
@@ -201,38 +200,43 @@ sub _parse {
 			}
 			if ( $subtype eq 'array' ) {
 				# Ok, remap...
-				push(@elems,\@newlist);
+				push(@elems, \@newlist);
 			} else {
 				# Ok, force into hash..
 				my %hash = @values;
-				push(@elems,\%hash);
+				push(@elems, \%hash);
 			}
-		} elsif ( $type eq 'scalar' ) {
+		} 
+		elsif ( $type eq 'scalar' ) {
 			# Ok, get our string size count...
-			my $strlen = $self->_readnum();
-			$self->_skipchar(); # Toss the seperator
+			my $strlen = $self->_readnum;
+			$self->_skipchar;
 
-			$self->_skipchar(); # Toss the seperator
+			$self->_skipchar;
 			my $string = $self->_readstr($strlen);
-			$self->_skipchar(); # Toss the seperator
-			$self->_skipchar(); # Toss the seperator
+			$self->_skipchar;
+			$self->_skipchar;
 		
 			push(@elems,$string);	
-		} elsif ( $type eq 'integer' || $type eq 'float' ) {
+		} 
+		elsif ( $type eq 'integer' || $type eq 'float' ) {
 			# Ok, read the value..
-			my $val = $self->_readnum();
+			my $val = $self->_readnum;
 			if ( $type eq 'integer' ) { $val = int($val); }
-			$self->_skipchar(); # Toss the seperator
-			push(@elems,$val);
-		} elsif ( $type eq 'boolean' ) {
+			$self->_skipchar;
+			push(@elems, $val);
+		} 
+		elsif ( $type eq 'boolean' ) {
 			# Ok, read our boolen value..
-			my $bool = $self->_readchar();
-			$self->_skipchar(); # Toss the seperator
-			push(@elems,$bool);
-		} elsif ( $type eq 'undef' ) {
+			my $bool = $self->_readchar;
+			$self->_skipchar;
+			push(@elems, $bool);
+		} 
+		elsif ( $type eq 'undef' ) {
 			# Ok, undef value..
-			push(@elems,undef);
-		} else {
+			push(@elems, undef);
+		} 
+		else {
 			confess "Unknown element type '$type' found! (cursor $$cursor)";
 		}
 	} # End of while.
@@ -243,30 +247,28 @@ sub _parse {
 } # End of decode.
 
 sub _readstr {
-	my $self = shift;
-	my $string = $$self{'string'};
-	my $cursor = $$self{'cursor'};
-	my $length = shift;
-
-	my $str = substr($$string,$$cursor,$length);
+	my ($self, $length) = @_;
+	my $string = $self->{string};
+	my $cursor = $self->{cursor};
+	my $str = substr($$string, $$cursor, $length);
 	$$cursor += $length;
 
 	return $str;
-} # End of readstr.
+}
 
 sub _readchar {
-	my $self = shift;
+	my ($self) = @_;
 	return $self->_readstr(1);
-} # End of readstr.
+}
 
 sub _readnum {
 	# Reads in a character at a time until we run out of numbers to read...
-	my $self = shift;
-	my $cursor = $$self{'cursor'};
+	my ($self) = @_;
+	my $cursor = $self->{cursor};
 
 	my $string;
 	while ( 1 ) {
-		my $char = $self->_readchar();
+		my $char = $self->_readchar;
 		if ( $char !~ /^[\d\.-]+$/ ) {
 			$$cursor--;
 			last;
@@ -279,7 +281,7 @@ sub _readnum {
 
 sub _skipchar {
 	my $self = shift;
-	${$$self{'cursor'}}++;
+	${$$self{cursor}}++;
 } # Move our cursor one bytes ahead...
 
 
@@ -294,71 +296,85 @@ SEE ALSO: serialize()
 =cut
 
 sub encode {
-	my $self = shift;
-	my $val = shift;
+	my ($self, $val) = @_;
 
-	use Carp qw(confess);
 	if ( ! defined $val ) {
-		return $self->_encode('null',$val);
-	} elsif ( ! ref($val) ) {
+		return $self->_encode('null', $val);
+	}
+	elsif ( blessed $val ) {
+	    return $self->_encode('obj', $val);
+	}
+	elsif ( ! ref($val) ) {
 		if ( $val =~ /^-?\d{1,10}$/ && abs($val) < 2**31 ) {
-			return $self->_encode('int',$val);
-		} elsif ( $val =~ /^-?\d+\.\d*$/ ) {
-			return $self->_encode('float',$val);
-		} else {
-			return $self->_encode('string',$val);
+			return $self->_encode('int', $val);
+		} 
+		elsif ( $val =~ /^-?\d+\.\d*$/ ) {
+			return $self->_encode('float', $val);
+		} 
+		else {
+			return $self->_encode('string', $val);
 		}
-	} else {
+	} 
+	else {
 		my $type = ref($val);
-		if ( $type eq 'HASH' || $type eq 'ARRAY' ) {
-			return $self->_encode('array',$val);
-		} elsif ( $type eq 'CODE' || $type eq 'REF' || $type eq 'GLOB' || $type eq 'LVALUE' ) {
+		if ($type eq 'HASH' || $type eq 'ARRAY' ) {
+			return $self->_encode('array', $val);
+		} 
+		else {
 			confess "I can't serialize data of type '$type'!";
-		} else {
-			# Object...
-			return $self->_encode('obj',$val);
 		}
 	}
-} # End of encode
+}
 
 sub _encode {
-	my $self = shift;
-	my $type = shift;
-	my $val = shift;
+	my ($self, $type, $val) = @_;
 
 	my $buffer = '';
 	if ( $type eq 'null' ) {
 		$buffer .= 'N;';
-	} elsif ( $type eq 'int' ) {
-		$buffer .= sprintf('i:%d;',$val);
-	} elsif ( $type eq 'float' ) {
-		$buffer .= sprintf('d:%s;',$val);
-	} elsif ( $type eq 'string' ) {
-		$buffer .= sprintf('s:%d:"%s";',length($val),$val);
-	} elsif ( $type eq 'array' ) {
+	} 
+	elsif ( $type eq 'int' ) {
+		$buffer .= sprintf('i:%d;', $val);
+	} 
+	elsif ( $type eq 'float' ) {
+		$buffer .= sprintf('d:%s;', $val);
+	} 
+	elsif ( $type eq 'string' ) {
+		$buffer .= sprintf('s:%d:"%s";', length($val), $val);
+	} 
+	elsif ( $type eq 'array' ) {
 		if ( ref($val) eq 'ARRAY' ) {
 			$buffer .= sprintf('a:%d:',($#{$val}+1)) . '{';
-			map { $buffer .= $self->encode($_); $buffer .= $self->encode($$val[$_]); } 0..$#{$val};
+			map { # Ewww
+			    $buffer .= $self->encode($_); 
+			    $buffer .= $self->encode($$val[$_]); 
+			} 0..$#{$val};
 			$buffer .= '}';
-		} else {
+		} 
+		else {
 			$buffer .= sprintf('a:%d:',scalar(keys(%{$val}))) . '{';
-			foreach ( %{$val} ) { $buffer .= $self->encode($_); }
+			foreach ( %{$val} ) { 
+			    $buffer .= $self->encode($_); 
+			}
 			$buffer .= '}';	
 		}
-	} elsif ( $type eq 'obj' ) {
+	} 
+	elsif ( $type eq 'obj' ) {
 		my $class = ref($val);
 		$class =~ /(\w+)$/;
 		my $subclass = $1;
-		$buffer .= sprintf('O:%d:"%s":%d:',length($subclass),$subclass,scalar(keys(%{$val}))) . '{';
-		foreach ( %{$val} ) { $buffer .= $self->encode($_); }
+		$buffer .= sprintf('O:%d:"%s":%d:', length($subclass), $subclass, scalar(keys %{$val})) . '{';
+		foreach ( %{$val} ) { 
+		    $buffer .= $self->encode($_); 
+		}
 		$buffer .= '}';
-	} else {
-		use Carp qw(confess);
+	} 
+	else {
 		confess "Unknown encode type!";
 	}	
 	return $buffer;	
 
-} # End of _encode sub.
+}
 
 =head1 TODO
 
