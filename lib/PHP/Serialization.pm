@@ -4,10 +4,11 @@ use warnings;
 use Exporter ();
 use Scalar::Util qw/blessed/;
 use Carp qw(croak confess);
+use bytes;
 
 use vars qw/$VERSION @ISA @EXPORT_OK/;
 
-$VERSION = '0.29';
+$VERSION = '0.30';
 	
 @ISA = qw(Exporter);	
 @EXPORT_OK = qw(unserialize serialize);

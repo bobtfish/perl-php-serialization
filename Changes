@@ -1,7 +1,9 @@
 Revision history for Perl extension PHP::Serialization
 
-0.30  2008-XX-XX
+0.30  2009-01-11
  - Significantly cleanup the code to be much prettier.
+ - Fix RT#42279, output sizes a bytes, not characters so that 
+   serializing multibyte data works correctly.
 
 0.29  2008-09-17
  - Fix bug with negative numbers, RT#6402, patch from
