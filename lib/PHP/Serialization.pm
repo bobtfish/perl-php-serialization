@@ -250,6 +250,9 @@ sub _parse {
 			# Ok, read our boolen value..
 			my $bool = $self->_readchar;
 			$self->_skipchar;
+            if ($bool eq '0') {
+                $bool = undef;
+            }
 			push(@elems, $bool);
 		} 
 		elsif ( $type eq 'undef' ) {
