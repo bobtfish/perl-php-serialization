@@ -1,5 +1,9 @@
 Revision history for Perl extension PHP::Serialization
 
+0.31  2009-04-14
+ - Add warning note to POD
+ - Take patch from RT#45024 to fix boolean deserialization bug.
+
 0.30  2009-01-11
  - Significantly cleanup the code to be much prettier.
  - Fix RT#42279, output sizes a bytes, not characters so that 

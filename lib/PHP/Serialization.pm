@@ -8,7 +8,7 @@ use bytes;
 
 use vars qw/$VERSION @ISA @EXPORT_OK/;
 
-$VERSION = '0.30';
+$VERSION = '0.31';
 	
 @ISA = qw(Exporter);	
 @EXPORT_OK = qw(unserialize serialize);
