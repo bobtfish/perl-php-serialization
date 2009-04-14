@@ -1,2 +1,7 @@
-.shipit
-MANIFEST.SKIP
+^MANIFEST\.BAK
+^blib
+^pm_to_blib
+^PHP-Serialization-.*
+\.shipit
+MANIFEST\.SKIP
+\.svn

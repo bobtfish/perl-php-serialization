@@ -10,3 +10,4 @@ WriteMakefile(
       (ABSTRACT_FROM => 'lib/PHP/Serialization.pm', # retrieve abstract from module
        AUTHOR     => 'Jesse Brown <jbrown@cpan.org>') : ()),
 );
+
