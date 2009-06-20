@@ -1,5 +1,6 @@
 steps = FindVersion, ChangeVersion, CheckChangeLog, DistTest, Commit, Tag, MakeDist, UploadCPAN
 
-svn.tagpattern = http://www.bobtfish.net/svn/repos/code/projects/PHP-Serialization/tags/%v
-
+git.tagpattern = %v
+git.push_to = origin
 CheckChangeLog.files = Changes
+
