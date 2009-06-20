@@ -1,5 +1,15 @@
 Revision history for Perl extension PHP::Serialization
 
+0.32  2009-06-20
+ - Making finite state machine
+ - Fixed bug in arrays RT21218
+ - RT24441 is not a bug
+ - Croaks on incomplete strings. RT44700
+ - Fixed bug with float as index. RT42029
+ - Removed warning from POD
+ - Changed todo in POD
+ - BOLAV@cpan.org
+
 0.31  2009-04-14
  - Add warning note to POD
  - Take patch from RT#45024 to fix boolean deserialization bug.

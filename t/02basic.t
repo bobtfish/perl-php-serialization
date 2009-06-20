@@ -9,5 +9,4 @@ my $data = {
 	third_test => -2,
 };
 my $encoded = serialize($data);
-warn "ENCODED $encoded";
 is_deeply($data, unserialize($encoded));

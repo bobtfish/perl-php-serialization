@@ -10,8 +10,7 @@ my $str = <DATA>;
 eval { PHP::Serialization::unserialize $str };
 
 {
-    local $TODO = 'BUG!';
-    ok(!$@, 'No exception') or warn $@;
+    ok($@, 'Illegal string');
 }
 
 __END__
