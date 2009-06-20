@@ -442,6 +442,8 @@ Various patches contributed by assorted authors on rt.cpan.org (as detailed in C
 
 Currently maintained by Tomas Doran <bobtfish@bobtfish.net>.
 
+Rewritten to solve all known bugs by Bjørn-Olav Strand <bolav@cpan.org>
+
 =cut
 
 package PHP::Serialization::Object;
