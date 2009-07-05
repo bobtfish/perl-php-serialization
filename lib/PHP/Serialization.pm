@@ -9,8 +9,8 @@ use bytes;
 use vars qw/$VERSION @ISA @EXPORT_OK/;
 
 $VERSION = '0.31';
-	
-@ISA = qw(Exporter);	
+
+@ISA = qw(Exporter);
 @EXPORT_OK = qw(unserialize serialize);
 
 =head1 NAME
@@ -47,7 +47,7 @@ Patches to fix any of these bugs are more than welcome!
 
 =head1 DESCRIPTION
 
-Provides a simple, quick means of serializing perl memory structures (including object data!) into a format that PHP can deserialize() and access, and vice versa. 
+Provides a simple, quick means of serializing perl memory structures (including object data!) into a format that PHP can deserialize() and access, and vice versa.
 
 NOTE: Converts PHP arrays into Perl Arrays when the PHP array used exclusively numeric indexes, and into Perl Hashes then the PHP array did not.
 
@@ -67,9 +67,9 @@ Exportable functions..
 
 =head2 serialize($var)
 
-Serializes the memory structure pointed to by $var, and returns a scalar value of encoded data. 
+Serializes the memory structure pointed to by $var, and returns a scalar value of encoded data.
 
-NOTE: Will recursively encode objects, hashes, arrays, etc. 
+NOTE: Will recursively encode objects, hashes, arrays, etc.
 
 SEE ALSO: ->encode()
 
@@ -81,7 +81,7 @@ sub serialize {
 
 =head2 unserialize($encoded,[optional CLASS])
 
-Deserializes the encoded data in $encoded, and returns a value (be it a hashref, arrayref, scalar, etc) 
+Deserializes the encoded data in $encoded, and returns a value (be it a hashref, arrayref, scalar, etc)
 representing the data structure serialized in $encoded_string.
 
 If the optional CLASS is specified, any objects are blessed into CLASS::$serialized_class. Otherwise, O
@@ -103,10 +103,10 @@ Functionality available if using the object interface..
 
 =head2 decode($encoded_string,[optional CLASS])
 
-Deserializes the encoded data in $encoded, and returns a value (be it a hashref, arrayref, scalar, etc) 
+Deserializes the encoded data in $encoded, and returns a value (be it a hashref, arrayref, scalar, etc)
 representing the data structure serialized in $encoded_string.
 
-If the optional CLASS is specified, any objects are blessed into CLASS::$serialized_class. Otherwise, 
+If the optional CLASS is specified, any objects are blessed into CLASS::$serialized_class. Otherwise,
 Objects are blessed into PHP::Serialization::Object::$serialized_class. (which has no methods)
 
 SEE ALSO: unserialize()
@@ -123,23 +123,23 @@ sub decode {
 
 	if ( defined $class ) {
 		$self->{class} = $class;
-	} 
+	}
 	else {
 		$self->{class} = 'PHP::Serialization::Object';
-	}	
+	}
 
 	# Ok, start parsing...
 	my @values = $self->_parse();
 
-	# Ok, we SHOULD only have one value.. 
+	# Ok, we SHOULD only have one value..
 	if ( $#values == -1 ) {
 		# Oops, none...
 		return;
-	} 
+	}
 	elsif ( $#values == 0 ) {
 		# Ok, return our one value..
 		return $values[0];
-	} 
+	}
 	else {
 		# Ok, return a reference to the list.
 		return \@values;
@@ -166,7 +166,7 @@ sub _parse {
 	confess("No cursor") unless $cursor;
 	confess("No string") unless $string;
 	confess("No strlen") unless $strlen;
-	my @elems;	
+	my @elems;
 	while ( $$cursor < $strlen ) {
 		# Ok, decode the type...
 		my $type = $self->_readchar();
@@ -179,7 +179,7 @@ sub _parse {
 		}
 		$self->_skipchar; # Toss the seperator
 		$type = $type_table{$type};
-	
+
 		# Ok, do per type processing..
 		if ( $type eq 'object' ) {
 			# Ok, get our name count...
@@ -209,9 +209,9 @@ sub _parse {
 			my $subtype = 'array';
 			my @newlist;
 			foreach ( 0..$#values ) {
-				if ( ($_ % 2) ) { 
+				if ( ($_ % 2) ) {
 					push(@newlist, $values[$_]);
-					next; 
+					next;
 				}
 				if ( $values[$_] !~ /^\d+$/ ) {
 					$subtype = 'hash';
@@ -226,7 +226,7 @@ sub _parse {
 				my %hash = @values;
 				push(@elems, \%hash);
 			}
-		} 
+		}
 		elsif ( $type eq 'scalar' ) {
 			# Ok, get our string size count...
 			my $strlen = $self->_readnum;
@@ -236,16 +236,16 @@ sub _parse {
 			my $string = $self->_readstr($strlen);
 			$self->_skipchar;
 			$self->_skipchar;
-		
-			push(@elems,$string);	
-		} 
+
+			push(@elems,$string);
+		}
 		elsif ( $type eq 'integer' || $type eq 'float' ) {
 			# Ok, read the value..
 			my $val = $self->_readnum;
 			if ( $type eq 'integer' ) { $val = int($val); }
 			$self->_skipchar;
 			push(@elems, $val);
-		} 
+		}
 		elsif ( $type eq 'boolean' ) {
 			# Ok, read our boolen value..
 			my $bool = $self->_readchar;
@@ -254,11 +254,11 @@ sub _parse {
                 $bool = undef;
             }
 			push(@elems, $bool);
-		} 
+		}
 		elsif ( $type eq 'undef' ) {
 			# Ok, undef value..
 			push(@elems, undef);
-		} 
+		}
 		else {
 			confess "Unknown element type '$type' found! (cursor $$cursor)";
 		}
@@ -266,7 +266,7 @@ sub _parse {
 
 	# Ok, return our elements list...
 	return @elems;
-	
+
 } # End of decode.
 
 sub _readstr {
@@ -310,9 +310,9 @@ sub _skipchar {
 
 =head2 encode($reference)
 
-Serializes the memory structure pointed to by $var, and returns a scalar value of encoded data. 
+Serializes the memory structure pointed to by $var, and returns a scalar value of encoded data.
 
-NOTE: Will recursively encode objects, hashes, arrays, etc. 
+NOTE: Will recursively encode objects, hashes, arrays, etc.
 
 SEE ALSO: serialize()
 
@@ -330,19 +330,19 @@ sub encode {
 	elsif ( ! ref($val) ) {
 		if ( $val =~ /^-?\d{1,10}$/ && abs($val) < 2**31 ) {
 			return $self->_encode('int', $val);
-		} 
+		}
 		elsif ( $val =~ /^-?\d+\.\d*$/ ) {
 			return $self->_encode('float', $val);
-		} 
+		}
 		else {
 			return $self->_encode('string', $val);
 		}
-	} 
+	}
 	else {
 		my $type = ref($val);
 		if ($type eq 'HASH' || $type eq 'ARRAY' ) {
 			return $self->_encode('array', $val);
-		} 
+		}
 		else {
 			confess "I can't serialize data of type '$type'!";
 		}
@@ -355,47 +355,47 @@ sub _encode {
 	my $buffer = '';
 	if ( $type eq 'null' ) {
 		$buffer .= 'N;';
-	} 
+	}
 	elsif ( $type eq 'int' ) {
 		$buffer .= sprintf('i:%d;', $val);
-	} 
+	}
 	elsif ( $type eq 'float' ) {
 		$buffer .= sprintf('d:%s;', $val);
-	} 
+	}
 	elsif ( $type eq 'string' ) {
 		$buffer .= sprintf('s:%d:"%s";', length($val), $val);
-	} 
+	}
 	elsif ( $type eq 'array' ) {
 		if ( ref($val) eq 'ARRAY' ) {
 			$buffer .= sprintf('a:%d:',($#{$val}+1)) . '{';
 			map { # Ewww
-			    $buffer .= $self->encode($_); 
-			    $buffer .= $self->encode($$val[$_]); 
+			    $buffer .= $self->encode($_);
+			    $buffer .= $self->encode($$val[$_]);
 			} 0..$#{$val};
 			$buffer .= '}';
-		} 
+		}
 		else {
 			$buffer .= sprintf('a:%d:',scalar(keys(%{$val}))) . '{';
-			foreach ( %{$val} ) { 
-			    $buffer .= $self->encode($_); 
+			foreach ( %{$val} ) {
+			    $buffer .= $self->encode($_);
 			}
-			$buffer .= '}';	
+			$buffer .= '}';
 		}
-	} 
+	}
 	elsif ( $type eq 'obj' ) {
 		my $class = ref($val);
 		$class =~ /(\w+)$/;
 		my $subclass = $1;
 		$buffer .= sprintf('O:%d:"%s":%d:', length($subclass), $subclass, scalar(keys %{$val})) . '{';
-		foreach ( %{$val} ) { 
-		    $buffer .= $self->encode($_); 
+		foreach ( %{$val} ) {
+		    $buffer .= $self->encode($_);
 		}
 		$buffer .= '}';
-	} 
+	}
 	else {
 		confess "Unknown encode type!";
-	}	
-	return $buffer;	
+	}
+	return $buffer;
 
 }
 
@@ -405,7 +405,7 @@ Make faster! (and more efficent?)
 
 =head1 AUTHOR INFORMATION
 
-Copyright (c) 2003 Jesse Brown <jbrown@cpan.org>. All rights reserved. This program is free software; 
+Copyright (c) 2003 Jesse Brown <jbrown@cpan.org>. All rights reserved. This program is free software;
 you can redistribute it and/or modify it under the same terms as Perl itself.
 
 Various patches contributed by assorted authors on rt.cpan.org (as detailed in Changes file).
