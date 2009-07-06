@@ -19,9 +19,9 @@ PHP::Serialization - simple flexible means of converting the output of PHP's ser
 
 =head1 SYNOPSIS
 
-	use PHP::Serialization qw(serialize unserialize);
-	my $encoded = serialize({ a => 1, b => 2});
-	my $hashref = unserialize($encoded);
+    use PHP::Serialization qw(serialize unserialize);
+    my $encoded = serialize({ a => 1, b => 2});
+    my $hashref = unserialize($encoded);
 
 =cut
 
@@ -36,8 +36,8 @@ NOTE: Converts PHP arrays into Perl Arrays when the PHP array used exclusively n
 
 sub new {
     my ($class) = shift;
-	my $self = bless {}, blessed($class) ? blessed($class) : $class;
-	return $self;
+    my $self = bless {}, blessed($class) ? blessed($class) : $class;
+    return $self;
 }
 
 =head1 FUNCTIONS
@@ -57,7 +57,7 @@ SEE ALSO: ->encode()
 =cut
 
 sub serialize {
-	return __PACKAGE__->new->encode(@_);
+    return __PACKAGE__->new->encode(@_);
 }
 
 =head2 unserialize($encoded,[optional CLASS])
@@ -73,7 +73,7 @@ SEE ALSO: ->decode()
 =cut
 
 sub unserialize {
-	return __PACKAGE__->new->decode(@_);
+    return __PACKAGE__->new->decode(@_);
 }
 
 =head1 METHODS
@@ -95,244 +95,244 @@ SEE ALSO: unserialize()
 =cut
 
 sub decode {
-	my ($self, $string, $class) = @_;
+    my ($self, $string, $class) = @_;
 
-	my $cursor = 0;
-	$self->{string} = \$string;
-	$self->{cursor} = \$cursor;
-	$self->{strlen} = length($string);
+    my $cursor = 0;
+    $self->{string} = \$string;
+    $self->{cursor} = \$cursor;
+    $self->{strlen} = length($string);
 
-	if ( defined $class ) {
-		$self->{class} = $class;
-	}
-	else {
-		$self->{class} = 'PHP::Serialization::Object';
-	}
+    if ( defined $class ) {
+        $self->{class} = $class;
+    }
+    else {
+        $self->{class} = 'PHP::Serialization::Object';
+    }
 
-	# Ok, start parsing...
-	my @values = $self->_parse();
+    # Ok, start parsing...
+    my @values = $self->_parse();
 
-	# Ok, we SHOULD only have one value..
-	if ( $#values == -1 ) {
-		# Oops, none...
-		return;
-	}
-	elsif ( $#values == 0 ) {
-		# Ok, return our one value..
-		return $values[0];
-	}
-	else {
-		# Ok, return a reference to the list.
-		return \@values;
-	}
+    # Ok, we SHOULD only have one value..
+    if ( $#values == -1 ) {
+        # Oops, none...
+        return;
+    }
+    elsif ( $#values == 0 ) {
+        # Ok, return our one value..
+        return $values[0];
+    }
+    else {
+        # Ok, return a reference to the list.
+        return \@values;
+    }
 
 } # End of decode sub.
 
 my %type_table = (
-	O => 'object',
-	s => 'scalar',
-	a => 'array',
-	i => 'integer',
-	d => 'float',
-	b => 'boolean',
-	N => 'undef',
+    O => 'object',
+    s => 'scalar',
+    a => 'array',
+    i => 'integer',
+    d => 'float',
+    b => 'boolean',
+    N => 'undef',
 );
 
 sub _parse_array {
-	my $self = shift;
-	my $elemcount = shift;
-	my $cursor = $self->{cursor};
-	my $string = $self->{string};
-	my $strlen = $self->{strlen};
-	confess("No cursor") unless $cursor;
-	confess("No string") unless $string;
-	confess("No strlen") unless $strlen;
+    my $self = shift;
+    my $elemcount = shift;
+    my $cursor = $self->{cursor};
+    my $string = $self->{string};
+    my $strlen = $self->{strlen};
+    confess("No cursor") unless $cursor;
+    confess("No string") unless $string;
+    confess("No strlen") unless $strlen;
 
-	my @elems = ();
+    my @elems = ();
 
-	$self->_skipchar('{');
-	foreach my $i (1..$elemcount*2) {
-		push(@elems,$self->_parse_elem);
-	}
-	$self->_skipchar('}');
-	return @elems;
+    $self->_skipchar('{');
+    foreach my $i (1..$elemcount*2) {
+        push(@elems,$self->_parse_elem);
+    }
+    $self->_skipchar('}');
+    return @elems;
 }
 
 sub _parse_elem {
-	my $self = shift;
-	my $cursor = $self->{cursor};
-	my $string = $self->{string};
-	my $strlen = $self->{strlen};
+    my $self = shift;
+    my $cursor = $self->{cursor};
+    my $string = $self->{string};
+    my $strlen = $self->{strlen};
 
-	my @elems;
+    my @elems;
 
-	my $type_c = $self->_readchar();
-	my $type = $type_table{$type_c};
-	if (!defined $type) {
-		croak("ERROR: Unknown type $type_c.");
-	}
+    my $type_c = $self->_readchar();
+    my $type = $type_table{$type_c};
+    if (!defined $type) {
+        croak("ERROR: Unknown type $type_c.");
+    }
 
-	if ( $type eq 'object' ) {
-		$self->_skipchar(':');
-		# Ok, get our name count...
-		my $namelen = $self->_readnum();
-		$self->_skipchar(':');
+    if ( $type eq 'object' ) {
+        $self->_skipchar(':');
+        # Ok, get our name count...
+        my $namelen = $self->_readnum();
+        $self->_skipchar(':');
 
-		# Ok, get our object name...
-		$self->_skipchar('"');
-		my $name = $self->_readstr($namelen);
-		$self->_skipchar('"');
+        # Ok, get our object name...
+        $self->_skipchar('"');
+        my $name = $self->_readstr($namelen);
+        $self->_skipchar('"');
 
-		# Ok, our sub elements...
-		$self->_skipchar(':');
-		my $elemcount = $self->_readnum();
-		$self->_skipchar(':');
+        # Ok, our sub elements...
+        $self->_skipchar(':');
+        my $elemcount = $self->_readnum();
+        $self->_skipchar(':');
 
-		my %value = $self->_parse_array($elemcount);
+        my %value = $self->_parse_array($elemcount);
 
-		# TODO: Call wakeup
-		# TODO: Support for objecttypes
-		return bless(\%value, $self->{class} . '::' . $name);
-	} elsif ( $type eq 'array' ) {
-		$self->_skipchar(':');
-		# Ok, our sub elements...
-		my $elemcount = $self->_readnum();
-		$self->_skipchar(':');
+        # TODO: Call wakeup
+        # TODO: Support for objecttypes
+        return bless(\%value, $self->{class} . '::' . $name);
+    } elsif ( $type eq 'array' ) {
+        $self->_skipchar(':');
+        # Ok, our sub elements...
+        my $elemcount = $self->_readnum();
+        $self->_skipchar(':');
 
-		my @values = $self->_parse_array($elemcount);
-		# If every other key is not numeric, map to a hash..
-		my $subtype = 'array';
-		my @newlist;
-		foreach ( 0..$#values ) {
-			if ( ($_ % 2) ) {
-				push(@newlist, $values[$_]);
-				next;
-			} elsif (($_ / 2) ne $values[$_]) {
-				$subtype = 'hash';
-				last;
-			}
-			if ( $values[$_] !~ /^\d+$/ ) {
-				$subtype = 'hash';
-				last;
-			}
-		}
-		if ( $subtype eq 'array' ) {
-			# Ok, remap...
-			return \@newlist;
-		} else {
-			# Ok, force into hash..
-			my %hash = @values;
-			return \%hash;
-		}
-	}
-	elsif ( $type eq 'scalar' ) {
-		$self->_skipchar(':');
-		# Ok, get our string size count...
-		my $strlen = $self->_readnum;
-		$self->_skipchar(':');
+        my @values = $self->_parse_array($elemcount);
+        # If every other key is not numeric, map to a hash..
+        my $subtype = 'array';
+        my @newlist;
+        foreach ( 0..$#values ) {
+            if ( ($_ % 2) ) {
+                push(@newlist, $values[$_]);
+                next;
+            } elsif (($_ / 2) ne $values[$_]) {
+                $subtype = 'hash';
+                last;
+            }
+            if ( $values[$_] !~ /^\d+$/ ) {
+                $subtype = 'hash';
+                last;
+            }
+        }
+        if ( $subtype eq 'array' ) {
+            # Ok, remap...
+            return \@newlist;
+        } else {
+            # Ok, force into hash..
+            my %hash = @values;
+            return \%hash;
+        }
+    }
+    elsif ( $type eq 'scalar' ) {
+        $self->_skipchar(':');
+        # Ok, get our string size count...
+        my $strlen = $self->_readnum;
+        $self->_skipchar(':');
 
-		$self->_skipchar('"');
-		my $string = $self->_readstr($strlen);
-		$self->_skipchar('"');
-		$self->_skipchar(';');
-		return $string;
-	}
-	elsif ( $type eq 'integer' || $type eq 'float' ) {
-		$self->_skipchar(':');
-		# Ok, read the value..
-		my $val = $self->_readnum;
-		if ( $type eq 'integer' ) { $val = int($val); }
-		$self->_skipchar(';');
-		return $val;
-	}
-	elsif ( $type eq 'boolean' ) {
-		$self->_skipchar(':');
-		# Ok, read our boolen value..
-		my $bool = $self->_readchar;
+        $self->_skipchar('"');
+        my $string = $self->_readstr($strlen);
+        $self->_skipchar('"');
+        $self->_skipchar(';');
+        return $string;
+    }
+    elsif ( $type eq 'integer' || $type eq 'float' ) {
+        $self->_skipchar(':');
+        # Ok, read the value..
+        my $val = $self->_readnum;
+        if ( $type eq 'integer' ) { $val = int($val); }
+        $self->_skipchar(';');
+        return $val;
+    }
+    elsif ( $type eq 'boolean' ) {
+        $self->_skipchar(':');
+        # Ok, read our boolen value..
+        my $bool = $self->_readchar;
 
-		$self->_skipchar;
+        $self->_skipchar;
         if ($bool eq '0') {
             $bool = undef;
         }
-		return $bool;
-	}
-	elsif ( $type eq 'undef' ) {
-		$self->_skipchar(';');
-		return undef;
-	}
-	else {
-		confess "Unknown element type '$type' found! (cursor $$cursor)";
-	}
+        return $bool;
+    }
+    elsif ( $type eq 'undef' ) {
+        $self->_skipchar(';');
+        return undef;
+    }
+    else {
+        confess "Unknown element type '$type' found! (cursor $$cursor)";
+    }
 
 }
 
 
 sub _parse {
-	my ($self) = @_;
-	my $cursor = $self->{cursor};
-	my $string = $self->{string};
-	my $strlen = $self->{strlen};
-	confess("No cursor") unless $cursor;
-	confess("No string") unless $string;
-	confess("No strlen") unless $strlen;
-	my @elems;
-	push(@elems,$self->_parse_elem);
+    my ($self) = @_;
+    my $cursor = $self->{cursor};
+    my $string = $self->{string};
+    my $strlen = $self->{strlen};
+    confess("No cursor") unless $cursor;
+    confess("No string") unless $string;
+    confess("No strlen") unless $strlen;
+    my @elems;
+    push(@elems,$self->_parse_elem);
 
-	# warn if we have unused chars
-	if ($$cursor != $strlen) {
-		carp("WARN: Unused characters in string after $$cursor.");
-	}
-	return @elems;
+    # warn if we have unused chars
+    if ($$cursor != $strlen) {
+        carp("WARN: Unused characters in string after $$cursor.");
+    }
+    return @elems;
 
 } # End of decode.
 
 sub _readstr {
-	my ($self, $length) = @_;
-	my $string = $self->{string};
-	my $cursor = $self->{cursor};
-	if ($$cursor + $length > length($$string)) {
-		croak("ERROR: Read past end of string. Want $length after $$cursor. (".$$string.")");
-	}
-	my $str = substr($$string, $$cursor, $length);
-	$$cursor += $length;
+    my ($self, $length) = @_;
+    my $string = $self->{string};
+    my $cursor = $self->{cursor};
+    if ($$cursor + $length > length($$string)) {
+        croak("ERROR: Read past end of string. Want $length after $$cursor. (".$$string.")");
+    }
+    my $str = substr($$string, $$cursor, $length);
+    $$cursor += $length;
 
-	return $str;
+    return $str;
 }
 
 sub _readchar {
-	my ($self) = @_;
-	return $self->_readstr(1);
+    my ($self) = @_;
+    return $self->_readstr(1);
 }
 
 sub _readnum {
-	# Reads in a character at a time until we run out of numbers to read...
-	my ($self) = @_;
-	my $cursor = $self->{cursor};
+    # Reads in a character at a time until we run out of numbers to read...
+    my ($self) = @_;
+    my $cursor = $self->{cursor};
 
-	my $string;
-	while ( 1 ) {
-		my $char = $self->_readchar;
-		if ( $char !~ /^[\d\.-]+$/ ) {
-			$$cursor--;
-			last;
-		}
-		$string .= $char;
-	} # End of while.
+    my $string;
+    while ( 1 ) {
+        my $char = $self->_readchar;
+        if ( $char !~ /^[\d\.-]+$/ ) {
+            $$cursor--;
+            last;
+        }
+        $string .= $char;
+    } # End of while.
 
-	return $string;
+    return $string;
 } # End of readnum
 
 sub _skipchar {
-	my $self = shift;
-	my $want = shift;
+    my $self = shift;
+    my $want = shift;
     my $c = $self->_readchar();
-	if (($want)&&($c ne $want)) {
-		my $cursor = $self->{cursor};
-		my $str = $self->{string};
-		croak("ERROR: Wrong char $c, expected $want at position ".$$cursor." (".$$str.")");
-	}
-	print "_skipchar: WRONG char $c ($want)\n" if (($want)&&($c ne $want));
-	# ${$$self{cursor}}++;
+    if (($want)&&($c ne $want)) {
+        my $cursor = $self->{cursor};
+        my $str = $self->{string};
+        croak("ERROR: Wrong char $c, expected $want at position ".$$cursor." (".$$str.")");
+    }
+    print "_skipchar: WRONG char $c ($want)\n" if (($want)&&($c ne $want));
+    # ${$$self{cursor}}++;
 } # Move our cursor one bytes ahead...
 
 
@@ -349,101 +349,101 @@ SEE ALSO: serialize()
 my $sorthash=0;
 
 sub encode {
-	my ($self, $val, $iskey, $shash) = @_;
-	$iskey=0 unless defined $iskey;
-	$sorthash=$shash if defined $shash;
+    my ($self, $val, $iskey, $shash) = @_;
+    $iskey=0 unless defined $iskey;
+    $sorthash=$shash if defined $shash;
 
-	if ( ! defined $val ) {
-		return $self->_encode('null', $val);
-	}
-	elsif ( blessed $val ) {
-	    return $self->_encode('obj', $val);
-	}
-	elsif ( ! ref($val) ) {
-		if ( $val =~ /^-?\d{1,10}$/ && abs($val) < 2**31 ) {
-			return $self->_encode('int', $val);
-		}
-		elsif ( $val =~ /^-?\d+\.\d*$/ && !$iskey) {
-			return $self->_encode('float', $val);
-		}
-		else {
-			return $self->_encode('string', $val);
-		}
-	}
-	else {
-		my $type = ref($val);
-		if ($type eq 'HASH' || $type eq 'ARRAY' ) {
-			return $self->_sort_hash_encode($val) if (($type eq 'HASH') and ($sorthash));
-			return $self->_encode('array', $val);
-		}
-		else {
-			confess "I can't serialize data of type '$type'!";
-		}
-	}
+    if ( ! defined $val ) {
+        return $self->_encode('null', $val);
+    }
+    elsif ( blessed $val ) {
+        return $self->_encode('obj', $val);
+    }
+    elsif ( ! ref($val) ) {
+        if ( $val =~ /^-?\d{1,10}$/ && abs($val) < 2**31 ) {
+            return $self->_encode('int', $val);
+        }
+        elsif ( $val =~ /^-?\d+\.\d*$/ && !$iskey) {
+            return $self->_encode('float', $val);
+        }
+        else {
+            return $self->_encode('string', $val);
+        }
+    }
+    else {
+        my $type = ref($val);
+        if ($type eq 'HASH' || $type eq 'ARRAY' ) {
+            return $self->_sort_hash_encode($val) if (($type eq 'HASH') and ($sorthash));
+            return $self->_encode('array', $val);
+        }
+        else {
+            confess "I can't serialize data of type '$type'!";
+        }
+    }
 }
 
 sub _sort_hash_encode {
-	my ($self, $val) = @_;
+    my ($self, $val) = @_;
 
-	my $buffer = '';
-	my @hsort = sort keys %{$val};
-	$buffer .= sprintf('a:%d:',scalar(@hsort)) . '{';
-	for (@hsort) {
-	    $buffer .= $self->encode($_,1);
-	    $buffer .= $self->encode($$val{$_});
-	}
-	$buffer .= '}';
-	return $buffer;
+    my $buffer = '';
+    my @hsort = sort keys %{$val};
+    $buffer .= sprintf('a:%d:',scalar(@hsort)) . '{';
+    for (@hsort) {
+        $buffer .= $self->encode($_,1);
+        $buffer .= $self->encode($$val{$_});
+    }
+    $buffer .= '}';
+    return $buffer;
 }
 
 sub _encode {
-	my ($self, $type, $val) = @_;
+    my ($self, $type, $val) = @_;
 
-	my $buffer = '';
-	if ( $type eq 'null' ) {
-		$buffer .= 'N;';
-	}
-	elsif ( $type eq 'int' ) {
-		$buffer .= sprintf('i:%d;', $val);
-	}
-	elsif ( $type eq 'float' ) {
-		$buffer .= sprintf('d:%s;', $val);
-	}
-	elsif ( $type eq 'string' ) {
-		$buffer .= sprintf('s:%d:"%s";', length($val), $val);
-	}
-	elsif ( $type eq 'array' ) {
-		if ( ref($val) eq 'ARRAY' ) {
-			$buffer .= sprintf('a:%d:',($#{$val}+1)) . '{';
-			map { # Ewww
-			    $buffer .= $self->encode($_);
-			    $buffer .= $self->encode($$val[$_]);
-			} 0..$#{$val};
-			$buffer .= '}';
-		}
-		else {
-			$buffer .= sprintf('a:%d:',scalar(keys(%{$val}))) . '{';
- 			while ( my ($key, $value) = each(%{$val}) ) {
- 			    $buffer .= $self->encode($key,1);
- 			    $buffer .= $self->encode($value);
-			}
-			$buffer .= '}';
-		}
-	}
-	elsif ( $type eq 'obj' ) {
-		my $class = ref($val);
-		$class =~ /(\w+)$/;
-		my $subclass = $1;
-		$buffer .= sprintf('O:%d:"%s":%d:', length($subclass), $subclass, scalar(keys %{$val})) . '{';
-		foreach ( %{$val} ) {
-		    $buffer .= $self->encode($_);
-		}
-		$buffer .= '}';
-	}
-	else {
-		confess "Unknown encode type!";
-	}
-	return $buffer;
+    my $buffer = '';
+    if ( $type eq 'null' ) {
+        $buffer .= 'N;';
+    }
+    elsif ( $type eq 'int' ) {
+        $buffer .= sprintf('i:%d;', $val);
+    }
+    elsif ( $type eq 'float' ) {
+        $buffer .= sprintf('d:%s;', $val);
+    }
+    elsif ( $type eq 'string' ) {
+        $buffer .= sprintf('s:%d:"%s";', length($val), $val);
+    }
+    elsif ( $type eq 'array' ) {
+        if ( ref($val) eq 'ARRAY' ) {
+            $buffer .= sprintf('a:%d:',($#{$val}+1)) . '{';
+            map { # Ewww
+                $buffer .= $self->encode($_);
+                $buffer .= $self->encode($$val[$_]);
+            } 0..$#{$val};
+            $buffer .= '}';
+        }
+        else {
+            $buffer .= sprintf('a:%d:',scalar(keys(%{$val}))) . '{';
+             while ( my ($key, $value) = each(%{$val}) ) {
+                 $buffer .= $self->encode($key,1);
+                 $buffer .= $self->encode($value);
+            }
+            $buffer .= '}';
+        }
+    }
+    elsif ( $type eq 'obj' ) {
+        my $class = ref($val);
+        $class =~ /(\w+)$/;
+        my $subclass = $1;
+        $buffer .= sprintf('O:%d:"%s":%d:', length($subclass), $subclass, scalar(keys %{$val})) . '{';
+        foreach ( %{$val} ) {
+            $buffer .= $self->encode($_);
+        }
+        $buffer .= '}';
+    }
+    else {
+        confess "Unknown encode type!";
+    }
+    return $buffer;
 
 }
 
