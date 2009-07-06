@@ -346,9 +346,12 @@ SEE ALSO: serialize()
 
 =cut
 
+my $sorthash=0;
+
 sub encode {
-	my ($self, $val, $iskey) = @_;
+	my ($self, $val, $iskey, $shash) = @_;
 	$iskey=0 unless defined $iskey;
+	$sorthash=$shash if defined $shash;
 
 	if ( ! defined $val ) {
 		return $self->_encode('null', $val);
@@ -370,12 +373,27 @@ sub encode {
 	else {
 		my $type = ref($val);
 		if ($type eq 'HASH' || $type eq 'ARRAY' ) {
+			return $self->_sort_hash_encode($val) if (($type eq 'HASH') and ($sorthash));
 			return $self->_encode('array', $val);
 		} 
 		else {
 			confess "I can't serialize data of type '$type'!";
 		}
 	}
+}
+
+sub _sort_hash_encode {
+	my ($self, $val) = @_;
+
+	my $buffer = '';
+	my @hsort = sort keys %{$val};
+	$buffer .= sprintf('a:%d:',scalar(@hsort)) . '{';
+	for (@hsort) {
+	    $buffer .= $self->encode($_,1);
+	    $buffer .= $self->encode($$val{$_});
+	}
+	$buffer .= '}';
+	return $buffer;
 }
 
 sub _encode {
