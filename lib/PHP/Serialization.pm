@@ -46,9 +46,13 @@ Exportable functions..
 
 =cut
 
-=head2 serialize($var)
+=head2 serialize($var,[optional $asString,[optional $sortHashes]])
 
 Serializes the memory structure pointed to by $var, and returns a scalar value of encoded data.
+
+If the optional $asString is true, $var will be encoded as string if it is double or float.
+
+If the optional $sortHashes is true, all hashes will be sorted before serialization.
 
 NOTE: Will recursively encode objects, hashes, arrays, etc.
 
@@ -336,9 +340,13 @@ sub _skipchar {
 } # Move our cursor one bytes ahead...
 
 
-=head2 encode($reference)
+=head2 encode($reference,[optional $asString,[optional $sortHashes]])
 
-Serializes the memory structure pointed to by $var, and returns a scalar value of encoded data.
+Serializes the memory structure pointed to by $reference, and returns a scalar value of encoded data.
+
+If the optional $asString is true, $reference will be encoded as string if it is double or float.
+
+If the optional $sortHashes is true, all hashes will be sorted before serialization.
 
 NOTE: Will recursively encode objects, hashes, arrays, etc.
 
@@ -373,7 +381,7 @@ sub encode {
     else {
         my $type = ref($val);
         if ($type eq 'HASH' || $type eq 'ARRAY' ) {
-            return $self->_sort_hash_encode($val) if (($type eq 'HASH') and ($sorthash));
+            return $self->_sort_hash_encode($val) if (($sorthash) and ($type eq 'HASH'));
             return $self->_encode('array', $val);
         }
         else {
