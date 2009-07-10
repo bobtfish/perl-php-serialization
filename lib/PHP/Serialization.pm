@@ -98,8 +98,11 @@ SEE ALSO: unserialize()
 
 =cut
 
+my $sorthash;
+
 sub decode {
-    my ($self, $string, $class) = @_;
+    my ($self, $string, $class, $shash) = @_;
+    $sorthash=$shash if defined($shash);
 
     my $cursor = 0;
     $self->{string} = \$string;
@@ -153,12 +156,18 @@ sub _parse_array {
     confess("No strlen") unless $strlen;
 
     my @elems = ();
+    my @shash_arr = ('some') if (($sorthash) and (ref($sorthash) eq 'HASH'));
 
     $self->_skipchar('{');
     foreach my $i (1..$elemcount*2) {
-        push(@elems,$self->_parse_elem);
+	push(@elems,$self->_parse_elem);
+	if (($i % 2) and (@shash_arr)) {
+	    $shash_arr[0]= ((($i-1)/2) eq $elems[$#elems])? 'array' : 'hash' unless ($shash_arr[0] eq 'hash');
+	    push(@shash_arr,$elems[$#elems]);
+	}
     }
     $self->_skipchar('}');
+    push(@elems,\@shash_arr) if (@shash_arr);
     return @elems;
 }
 
@@ -207,6 +216,7 @@ sub _parse_elem {
         # If every other key is not numeric, map to a hash..
         my $subtype = 'array';
         my @newlist;
+	my @shash_arr=@{pop(@values)} if (ref($sorthash) eq 'HASH');
         foreach ( 0..$#values ) {
             if ( ($_ % 2) ) {
                 push(@newlist, $values[$_]);
@@ -226,6 +236,7 @@ sub _parse_elem {
         } else {
             # Ok, force into hash..
             my %hash = @values;
+	    ${$sorthash}{\%hash}=@shash_arr if ((ref($sorthash) eq 'HASH') and @shash_arr and (shift(@shash_arr) ne 'array'));
             return \%hash;
         }
     }
@@ -354,8 +365,6 @@ SEE ALSO: serialize()
 
 =cut
 
-my $sorthash=0;
-
 sub encode {
     my ($self, $val, $iskey, $shash) = @_;
     $iskey=0 unless defined $iskey;
@@ -394,7 +403,7 @@ sub _sort_hash_encode {
     my ($self, $val) = @_;
 
     my $buffer = '';
-    my @hsort = sort keys %{$val};
+    my @hsort = ((ref($sorthash) eq 'HASH') and (ref(${$sorthash}{$val}) eq 'ARRAY')) ? ${$sorthash}{$val} : sort keys %{$val};
     $buffer .= sprintf('a:%d:',scalar(@hsort)) . '{';
     for (@hsort) {
         $buffer .= $self->encode($_,1);
