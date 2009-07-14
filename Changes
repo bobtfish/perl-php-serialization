@@ -1,8 +1,10 @@
 Revision history for Perl extension PHP::Serialization
 
-0.33  2009-07-13
- - Added ability to store the order of the keys on decoding PHP assoc array
- - Added ability to sort the keys on encoding HASHes
+0.33  2009-07-14
+ - Added ability to store the order of the keys on decoding
+   PHP assoc array (Alexander Bassilov)
+ - Added ability to sort the keys on encoding HASHes (Alexander
+   Bassilov)
 
 0.32  2009-06-20
  - Making finite state machine
