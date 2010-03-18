@@ -1,5 +1,8 @@
 Revision history for Perl extension PHP::Serialization
 
+ - Fix keys and values like '010' being serialized as strings as expected
+   rather than being turned into ints. (RT#48594)
+
 0.33  2009-07-14
  - Added ability to store the order of the keys on decoding
    PHP assoc array (Alexander Bassilov)

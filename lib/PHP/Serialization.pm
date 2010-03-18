@@ -377,7 +377,7 @@ sub encode {
         return $self->_encode('obj', $val);
     }
     elsif ( ! ref($val) ) {
-        if ( $val =~ /^-?\d{1,10}$/ && abs($val) < 2**31 ) {
+        if ( $val =~ /^-?(?:[0-9]|[1-9]\d{1,10})$/ && abs($val) < 2**31 ) {
             return $self->_encode('int', $val);
         }
         elsif ( $val =~ /^-?\d+\.\d*$/ && !$iskey) {
