@@ -1,5 +1,6 @@
 Revision history for Perl extension PHP::Serialization
 
+0.34  2010-03-18
  - Fix keys and values like '010' being serialized as strings as expected
    rather than being turned into ints. (RT#48594)
 
