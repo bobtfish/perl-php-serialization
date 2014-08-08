@@ -449,8 +449,7 @@ sub _encode {
     }
     elsif ( $type eq 'obj' ) {
         my $class = ref($val);
-        $class =~ /(\w+)$/;
-        my $subclass = $1;
+        my $subclass = (split "::", $class)[-1];
         $buffer .= sprintf('O:%d:"%s":%d:', length($subclass), $subclass, scalar(keys %{$val})) . '{';
         foreach ( %{$val} ) {
             $buffer .= $self->encode($_);
